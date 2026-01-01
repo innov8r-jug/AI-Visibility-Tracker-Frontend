@@ -26,9 +26,9 @@ function Results() {
   const [tabValue, setTabValue] = useState(0)
   
   // Decode the category from URL (handles %20 and other encoded characters)
-  // Category in URL is camelCase, convert to display name
-  const categoryKey = categoryParam ? decodeURIComponent(categoryParam) : ''
-  const category = getCategoryDisplay(categoryKey)
+  // Category in URL is the display name, convert to camelCase for API if needed, but backend handles both
+  const category = categoryParam ? decodeURIComponent(categoryParam) : ''
+  const categoryDisplay = getCategoryDisplay(category) // Get display name for UI
 
   useEffect(() => {
     let isMounted = true
@@ -40,9 +40,9 @@ function Results() {
         if (!dashboardData) {
           setLoading(true)
         }
-        console.log('Fetching dashboard data for category:', categoryKey)
-        // Send camelCase key to API
-        const data = await getDashboardData(categoryKey)
+        console.log('Fetching dashboard data for category:', category)
+        // Send category to API (backend handles both display name and camelCase)
+        const data = await getDashboardData(category)
         console.log('Dashboard data received:', data)
         if (isMounted) {
           setDashboardData(data)
@@ -55,7 +55,7 @@ function Results() {
           message: err.message,
           response: err.response?.data,
           status: err.response?.status,
-          category: categoryKey
+          category: category
         })
         if (isMounted) {
           setError(err.response?.data?.message || err.message || 'Failed to load dashboard data')
@@ -65,7 +65,7 @@ function Results() {
     }
 
     // Only fetch if we have a category
-    if (categoryKey) {
+    if (category) {
       // Initial fetch
       fetchData()
       
@@ -87,7 +87,7 @@ function Results() {
         clearInterval(intervalId)
       }
     }
-  }, [categoryKey])
+  }, [category]) // Depend on the decoded category
 
   if (loading && !dashboardData) {
     return (
@@ -169,7 +169,7 @@ function Results() {
             Category
           </Typography>
           <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
-            {category || 'Loading...'}
+            {categoryDisplay || category || 'Loading...'}
           </Typography>
         </Box>
 

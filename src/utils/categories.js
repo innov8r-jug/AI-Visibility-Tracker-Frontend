@@ -4,6 +4,7 @@
  */
 
 // Category options with display name -> camelCase mapping
+// Must match backend CategoryUtils.java exactly
 export const CATEGORIES = [
   { display: 'CRM Software', key: 'crmSoftware' },
   { display: 'Project Management Tools', key: 'projectManagementTools' },
@@ -13,13 +14,10 @@ export const CATEGORIES = [
   { display: 'Customer Support Software', key: 'customerSupportSoftware' },
   { display: 'Marketing Automation Tools', key: 'marketingAutomationTools' },
   { display: 'Content Management Systems', key: 'contentManagementSystems' },
-  { display: 'Social Media Management Tools', key: 'socialMediaManagementTools' },
+  { display: 'Social Media Management', key: 'socialMediaManagement' },
   { display: 'SEO Tools', key: 'seoTools' },
   { display: 'Design Tools', key: 'designTools' },
-  { display: 'Video Conferencing Software', key: 'videoConferencingSoftware' },
-  { display: 'Accounting Software', key: 'accountingSoftware' },
-  { display: 'HR Management Systems', key: 'hrManagementSystems' },
-  { display: 'Cloud Storage Services', key: 'cloudStorageServices' },
+  { display: 'Video Conferencing Tools', key: 'videoConferencingTools' },
 ]
 
 // Create a map for quick lookup: camelCase -> display name

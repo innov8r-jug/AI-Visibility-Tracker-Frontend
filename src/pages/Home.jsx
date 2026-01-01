@@ -90,21 +90,17 @@ function Home() {
         return
       }
 
-      // Convert display name to camelCase key for database
-      const categoryKey = getCategoryKey(category)
-
       console.log('Sending analysis request:', {
-        category: categoryKey,
-        categoryDisplay: category,
+        category: category,
         brands: brandList,
         aiModels: validModels
       })
 
-      await analyzeVisibility(categoryKey, brandList, validModels)
+      await analyzeVisibility(category, brandList, validModels)
       // Wait a bit for analysis to start, then navigate
-      // Use camelCase key in URL for consistency
+      // Use display name in URL (backend handles conversion)
       setTimeout(() => {
-        navigate(`/results/${encodeURIComponent(categoryKey)}`)
+        navigate(`/results/${encodeURIComponent(category)}`)
       }, 1000)
     } catch (error) {
       console.error('Error starting analysis:', error)
