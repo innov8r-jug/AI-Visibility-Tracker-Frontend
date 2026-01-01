@@ -10,7 +10,7 @@ import {
   Paper,
   Button,
 } from '@mui/material'
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
+import { ArrowBack as ArrowBackIcon, Refresh as RefreshIcon } from '@mui/icons-material'
 import { getDashboardData } from '../services/api'
 import WritesonicLogo from '../components/WritesonicLogo'
 import Dashboard from '../components/Dashboard'
@@ -24,6 +24,7 @@ function Results() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [tabValue, setTabValue] = useState(0)
+  const [isPolling, setIsPolling] = useState(true)
   
   // Decode the category from URL (handles %20 and other encoded characters)
   // Category in URL is the display name, convert to camelCase for API if needed, but backend handles both
@@ -33,6 +34,9 @@ function Results() {
   useEffect(() => {
     let isMounted = true
     let intervalId = null
+    let pollAttempts = 0
+    const MAX_POLL_ATTEMPTS = 20 // Stop polling after 20 attempts (10 minutes at 30s intervals)
+    const POLL_INTERVAL = 30000 // 30 seconds
 
     const fetchData = async () => {
       try {
@@ -48,6 +52,16 @@ function Results() {
           setDashboardData(data)
           setLoading(false)
           setError(null)
+          
+          // Stop polling if we have data with prompts (analysis is complete)
+          if (data && data.metrics && data.metrics.totalPrompts > 0) {
+            console.log('Analysis complete - stopping polling')
+            if (intervalId) {
+              clearInterval(intervalId)
+              intervalId = null
+            }
+            setIsPolling(false)
+          }
         }
       } catch (err) {
         console.error('Error fetching dashboard data:', err)
@@ -58,8 +72,18 @@ function Results() {
           category: category
         })
         if (isMounted) {
-          setError(err.response?.data?.message || err.message || 'Failed to load dashboard data')
-          setLoading(false)
+          // Only set error on first fetch or if it's a persistent error
+          if (!dashboardData || err.response?.status === 404) {
+            setError(err.response?.data?.message || err.message || 'Failed to load dashboard data')
+            setLoading(false)
+            // Stop polling on persistent errors (like 404)
+            if (err.response?.status === 404 && intervalId) {
+              console.log('Category not found - stopping polling')
+              clearInterval(intervalId)
+              intervalId = null
+              setIsPolling(false)
+            }
+          }
         }
       }
     }
@@ -69,13 +93,21 @@ function Results() {
       // Initial fetch
       fetchData()
       
-      // Poll for updates every 30 seconds (reduced from 5 seconds to reduce DB load)
-      // Only poll if we have data (analysis might still be running)
+      // Poll for updates (only if analysis might still be running)
+      // Stop after MAX_POLL_ATTEMPTS to avoid infinite polling
       intervalId = setInterval(() => {
         if (isMounted) {
+          pollAttempts++
+          if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+            console.log('Max poll attempts reached - stopping polling')
+            clearInterval(intervalId)
+            intervalId = null
+            setIsPolling(false)
+            return
+          }
           fetchData()
         }
-      }, 30000) // 30 seconds instead of 5
+      }, POLL_INTERVAL)
     } else {
       setError('No category specified')
       setLoading(false)
@@ -159,9 +191,43 @@ function Results() {
             />
             <WritesonicLogo size={40} showText={true} />
           </Box>
-          <Typography variant="h5" component="h1" sx={{ fontWeight: 700, color: '#1F2937' }}>
-            AI Search Tracking Dashboard
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="h5" component="h1" sx={{ fontWeight: 700, color: '#1F2937' }}>
+              AI Search Tracking Dashboard
+            </Typography>
+            {isPolling && (
+              <Typography variant="caption" sx={{ color: '#6B7280', fontStyle: 'italic' }}>
+                Auto-refreshing...
+              </Typography>
+            )}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={async () => {
+                setLoading(true)
+                try {
+                  const data = await getDashboardData(category)
+                  setDashboardData(data)
+                  setError(null)
+                } catch (err) {
+                  setError(err.response?.data?.message || err.message || 'Failed to refresh')
+                } finally {
+                  setLoading(false)
+                }
+              }}
+              sx={{
+                borderColor: '#7C3AED',
+                color: '#7C3AED',
+                '&:hover': {
+                  borderColor: '#6D28D9',
+                  color: '#6D28D9',
+                }
+              }}
+            >
+              Refresh
+            </Button>
+          </Box>
         </Box>
 
         <Box sx={{ mb: 3 }}>
