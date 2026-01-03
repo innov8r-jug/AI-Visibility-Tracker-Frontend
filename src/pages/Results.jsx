@@ -192,14 +192,9 @@ function Results() {
             <WritesonicLogo size={40} showText={true} />
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h5" component="h1" sx={{ fontWeight: 700, color: '#1F2937' }}>
+            <Typography variant="h5" component="h1" sx={{ fontWeight: 700, color: '#1F2937', letterSpacing: '-0.02em' }}>
               AI Search Tracking Dashboard
             </Typography>
-            {isPolling && (
-              <Typography variant="caption" sx={{ color: '#6B7280', fontStyle: 'italic' }}>
-                Auto-refreshing...
-              </Typography>
-            )}
             <Button
               variant="outlined"
               size="small"
@@ -230,11 +225,19 @@ function Results() {
           </Box>
         </Box>
 
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body1" sx={{ color: '#6B7280', mb: 1 }}>
+        <Box 
+          sx={{ 
+            mb: 3,
+            p: 2,
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+            border: '1px solid #bae6fd',
+          }}
+        >
+          <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.75rem' }}>
             Category
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1F2937' }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>
             {categoryDisplay || category || 'Loading...'}
           </Typography>
         </Box>
@@ -246,23 +249,30 @@ function Results() {
             mb: 3,
             borderRadius: 3,
             border: '1px solid #E5E7EB',
-            background: '#FFFFFF'
+            background: 'linear-gradient(135deg, #f9fafb 0%, #ffffff 100%)',
           }}
         >
           <Tabs 
             value={tabValue} 
-            onChange={(e, v) => setTabValue(v)}
+            onChange={(e, v) => {
+              console.log('Tab changed to:', v)
+              setTabValue(v)
+            }}
             sx={{
               '& .MuiTab-root': {
                 textTransform: 'none',
-                fontWeight: 500,
+                fontWeight: 600,
                 color: '#6B7280',
+                fontSize: '0.95rem',
+                minHeight: 48,
                 '&.Mui-selected': {
                   color: '#7C3AED',
                 }
               },
               '& .MuiTabs-indicator': {
                 backgroundColor: '#7C3AED',
+                height: 3,
+                borderRadius: '3px 3px 0 0',
               }
             }}
           >
@@ -273,7 +283,9 @@ function Results() {
         </Paper>
 
         {dashboardData ? (
-          <Dashboard data={dashboardData} tabValue={tabValue} />
+          <Box key={tabValue} sx={{ animation: 'fadeIn 0.3s ease-in' }}>
+            <Dashboard data={dashboardData} tabValue={tabValue} />
+          </Box>
         ) : (
           <Paper 
             elevation={0} 

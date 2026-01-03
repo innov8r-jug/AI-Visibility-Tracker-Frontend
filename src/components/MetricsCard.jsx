@@ -21,7 +21,7 @@ function MetricsCard({ metrics, brandMetrics }) {
     return sum / brandMetrics.length
   }
 
-  const totalPagesCited = metrics?.totalMentions || 0
+  const totalPagesCited = metrics?.totalCitations || 0
   const averageVisibility = calculateAverageVisibility()
 
   return (
@@ -29,23 +29,29 @@ function MetricsCard({ metrics, brandMetrics }) {
       {/* Brand Presence */}
       <Grid item xs={12} md={3}>
         <Paper
-          elevation={2}
+          elevation={0}
           sx={{
             p: 3,
-            borderRadius: 2,
+            borderRadius: 3,
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 12px 24px rgba(102, 126, 234, 0.4)',
+            },
           }}
         >
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Visibility</Typography>
-            <VisibilityIcon />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Visibility</Typography>
+            <VisibilityIcon sx={{ fontSize: 28 }} />
           </Box>
           <Box position="relative" display="inline-flex" mb={2}>
             <CircularProgress
               variant="determinate"
               value={averageVisibility}
-              size={80}
+              size={90}
               thickness={4}
               sx={{ color: 'white' }}
             />
@@ -61,23 +67,38 @@ function MetricsCard({ metrics, brandMetrics }) {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="h6" component="div" color="white">
+              <Typography variant="h5" component="div" color="white" sx={{ fontWeight: 700 }}>
                 {averageVisibility.toFixed(0)}%
               </Typography>
             </Box>
           </Box>
-          <Typography variant="body2">Answers Mentioned: {metrics?.totalMentions || 0}</Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            Answers Mentioned: {metrics?.totalMentions || 0}
+          </Typography>
         </Paper>
       </Grid>
 
       {/* Citations */}
       <Grid item xs={12} md={3}>
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            border: '1px solid #e5e7eb',
+            background: 'white',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Total Pages Cited</Typography>
-            <LinkIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Total Pages Cited</Typography>
+            <LinkIcon color="primary" sx={{ fontSize: 28 }} />
           </Box>
-          <Typography variant="h4" color="primary" gutterBottom>
+          <Typography variant="h4" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
             {totalPagesCited}
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
@@ -91,12 +112,25 @@ function MetricsCard({ metrics, brandMetrics }) {
 
       {/* Prompts Tracked */}
       <Grid item xs={12} md={3}>
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            border: '1px solid #e5e7eb',
+            background: 'white',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Prompts Tracked</Typography>
-            <AssessmentIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Prompts Tracked</Typography>
+            <AssessmentIcon color="primary" sx={{ fontSize: 28 }} />
           </Box>
-          <Typography variant="h4" color="primary" gutterBottom>
+          <Typography variant="h4" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
             {metrics?.totalPrompts || 0}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -107,12 +141,25 @@ function MetricsCard({ metrics, brandMetrics }) {
 
       {/* Brands Tracked */}
       <Grid item xs={12} md={3}>
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            borderRadius: 3,
+            border: '1px solid #e5e7eb',
+            background: 'white',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+            },
+          }}
+        >
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Brands Tracked</Typography>
-            <AssessmentIcon color="primary" />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Brands Tracked</Typography>
+            <AssessmentIcon color="primary" sx={{ fontSize: 28 }} />
           </Box>
-          <Typography variant="h4" color="primary" gutterBottom>
+          <Typography variant="h4" color="primary" gutterBottom sx={{ fontWeight: 700 }}>
             {metrics?.brandsTracked || 0}
           </Typography>
           <Typography variant="body2" color="text.secondary">

@@ -1,8 +1,20 @@
 {
-  "name": "ai-visibility-tracker-frontend",
-  "private": true,
+  "name": "qq",
   "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "homepage": "https://github.com/innov8r-jug/AI-Visibility-Tracker-Frontend#readme",
+  "bugs": {
+    "url": "https://github.com/innov8r-jug/AI-Visibility-Tracker-Frontend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innov8r-jug/AI-Visibility-Tracker-Frontend.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "vite.config.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -26,4 +38,3 @@
     "vite": "^5.0.0"
   }
 }
-

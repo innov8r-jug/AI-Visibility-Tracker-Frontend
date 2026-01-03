@@ -1,23 +1,24 @@
 import React from 'react'
-import { Grid, Box } from '@mui/material'
+import { Grid, Box, Fade } from '@mui/material'
 import MetricsCard from './MetricsCard'
 import Leaderboard from './Leaderboard'
 import PromptList from './PromptList'
 import TopCitedPages from './TopCitedPages'
-import VisibilityTrends from './VisibilityTrends'
+import ModelInsights from './ModelInsights'
 
 function Dashboard({ data, tabValue }) {
   return (
-    <Box>
+    <Fade in={true} timeout={300}>
+      <Box>
       <Grid container spacing={3}>
         {/* Metrics Cards */}
         <Grid item xs={12}>
           <MetricsCard metrics={data.metrics} brandMetrics={data.brandMetrics} />
         </Grid>
 
-        {/* Visibility Trends Chart */}
+        {/* Model Insights - Replaces Visibility Trends */}
         <Grid item xs={12}>
-          <VisibilityTrends data={data} />
+          <ModelInsights data={data} tabValue={tabValue} />
         </Grid>
 
         {/* Leaderboard */}
@@ -43,7 +44,8 @@ function Dashboard({ data, tabValue }) {
           <PromptList prompts={data.prompts} />
         </Grid>
       </Grid>
-    </Box>
+      </Box>
+    </Fade>
   )
 }
 

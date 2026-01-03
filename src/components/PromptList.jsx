@@ -25,9 +25,17 @@ function PromptList({ prompts }) {
   const models = [...new Set(prompts?.map((p) => p.aiModel) || [])]
 
   return (
-    <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        p: 3, 
+        borderRadius: 3,
+        border: '1px solid #e5e7eb',
+        background: 'white',
+      }}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>
           Prompts Tracked
         </Typography>
         <Box display="flex" gap={1}>
@@ -66,10 +74,18 @@ function PromptList({ prompts }) {
             <ListItem
               key={prompt.id}
               sx={{
-                border: '1px solid #e0e0e0',
-                borderRadius: 1,
-                mb: 1,
-                bgcolor: prompt.mentionedBrands?.length > 0 ? '#f5f5f5' : 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: 2,
+                mb: 1.5,
+                background: prompt.mentionedBrands?.length > 0 
+                  ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)'
+                  : 'white',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateX(4px)',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  borderColor: prompt.mentionedBrands?.length > 0 ? '#10b981' : '#7C3AED',
+                },
               }}
             >
               <ListItemText
