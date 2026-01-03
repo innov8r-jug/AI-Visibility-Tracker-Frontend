@@ -182,19 +182,49 @@ function Results() {
 
   return (
     <Box className="results-container">
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Container maxWidth="xl" sx={{ py: 2 }}>
+        {/* Header with Project Name */}
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+          {/* Left side - Back button and Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
             <ArrowBackIcon
               sx={{ cursor: 'pointer', color: '#6B7280', '&:hover': { color: '#7C3AED' } }}
               onClick={() => navigate('/')}
             />
             <WritesonicLogo size={40} showText={true} />
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h5" component="h1" sx={{ fontWeight: 700, color: '#1F2937', letterSpacing: '-0.02em' }}>
-              AI Search Tracking Dashboard
+          
+          {/* Center - Project Name with Animation */}
+          <Box sx={{ 
+            position: 'absolute', 
+            left: '50%', 
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              className="animated-title"
+              sx={{ 
+                fontWeight: 700, 
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 50%, #9333EA 100%)',
+                backgroundSize: '200% 200%',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                animation: 'gradientShift 3s ease infinite',
+                textAlign: 'center',
+              }}
+            >
+              AI Visibility Tracker
             </Typography>
+          </Box>
+          
+          {/* Right side - Refresh Button */}
+          <Box sx={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               variant="outlined"
               size="small"
@@ -225,9 +255,10 @@ function Results() {
           </Box>
         </Box>
 
+        {/* Category Display */}
         <Box 
           sx={{ 
-            mb: 3,
+            mb: 2,
             p: 2,
             borderRadius: 2,
             background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
@@ -242,11 +273,12 @@ function Results() {
           </Typography>
         </Box>
 
+        {/* Navigation Tabs */}
         <Paper 
           elevation={0} 
           sx={{ 
-            p: 2, 
-            mb: 3,
+            p: 1.5, 
+            mb: 2,
             borderRadius: 3,
             border: '1px solid #E5E7EB',
             background: 'linear-gradient(135deg, #f9fafb 0%, #ffffff 100%)',
@@ -264,7 +296,8 @@ function Results() {
                 fontWeight: 600,
                 color: '#6B7280',
                 fontSize: '0.95rem',
-                minHeight: 48,
+                minHeight: 44,
+                px: 3,
                 '&.Mui-selected': {
                   color: '#7C3AED',
                 }

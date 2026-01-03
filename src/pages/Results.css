@@ -1,7 +1,7 @@
 .results-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  padding: 2rem 0;
+  padding: 1rem 0;
 }
 
 @keyframes fadeIn {
@@ -13,5 +13,21 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-title {
+  animation: gradientShift 3s ease infinite;
 }
 

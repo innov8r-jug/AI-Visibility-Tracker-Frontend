@@ -10,40 +10,68 @@ function Dashboard({ data, tabValue }) {
   return (
     <Fade in={true} timeout={300}>
       <Box>
-      <Grid container spacing={3}>
-        {/* Metrics Cards */}
-        <Grid item xs={12}>
-          <MetricsCard metrics={data.metrics} brandMetrics={data.brandMetrics} />
-        </Grid>
+        <Grid container spacing={3}>
+          {/* Metrics Cards - Always visible */}
+          <Grid item xs={12}>
+            <MetricsCard metrics={data.metrics} brandMetrics={data.brandMetrics} />
+          </Grid>
 
-        {/* Model Insights - Replaces Visibility Trends */}
-        <Grid item xs={12}>
-          <ModelInsights data={data} tabValue={tabValue} />
-        </Grid>
+          {/* General Tab: Show Model Insights only */}
+          {tabValue === 0 && (
+            <Grid item xs={12}>
+              <ModelInsights data={data} tabValue={tabValue} />
+            </Grid>
+          )}
 
-        {/* Leaderboard */}
-        <Grid item xs={12} md={6}>
-          <Leaderboard
-            leaderboard={data.leaderboard}
-            leaderboardByModel={data.leaderboardByModel}
-            tabValue={tabValue}
-          />
-        </Grid>
+          {/* Platforms Tab: Show Leaderboard and Top Cited Pages with model filtering */}
+          {tabValue === 1 && (
+            <>
+              <Grid item xs={12}>
+                <ModelInsights data={data} tabValue={tabValue} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Leaderboard
+                  leaderboard={data.leaderboard}
+                  leaderboardByModel={data.leaderboardByModel}
+                  tabValue={tabValue}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TopCitedPages
+                  topCitedPages={data.topCitedPages}
+                  topCitedPagesByModel={data.topCitedPagesByModel}
+                  tabValue={tabValue}
+                />
+              </Grid>
+            </>
+          )}
 
-        {/* Top Cited Pages */}
-        <Grid item xs={12} md={6}>
-          <TopCitedPages
-            topCitedPages={data.topCitedPages}
-            topCitedPagesByModel={data.topCitedPagesByModel}
-            tabValue={tabValue}
-          />
+          {/* Competitors Tab: Show all competitor-focused components */}
+          {tabValue === 2 && (
+            <>
+              <Grid item xs={12}>
+                <ModelInsights data={data} tabValue={tabValue} />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Leaderboard
+                  leaderboard={data.leaderboard}
+                  leaderboardByModel={data.leaderboardByModel}
+                  tabValue={tabValue}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TopCitedPages
+                  topCitedPages={data.topCitedPages}
+                  topCitedPagesByModel={data.topCitedPagesByModel}
+                  tabValue={tabValue}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <PromptList prompts={data.prompts} />
+              </Grid>
+            </>
+          )}
         </Grid>
-
-        {/* Prompt List */}
-        <Grid item xs={12}>
-          <PromptList prompts={data.prompts} />
-        </Grid>
-      </Grid>
       </Box>
     </Fade>
   )
