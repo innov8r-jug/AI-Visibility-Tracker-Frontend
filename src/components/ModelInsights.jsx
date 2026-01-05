@@ -18,6 +18,7 @@ import {
 
 function ModelInsights({ data, tabValue = 0 }) {
   const { brandMetrics = [], modelComparison = {}, metrics = {} } = data || {}
+  const brandNames = brandMetrics?.map((b) => b.brandName) || []
   
   // Adjust title based on tab
   const getTitle = () => {
@@ -233,6 +234,48 @@ function ModelInsights({ data, tabValue = 0 }) {
               ) : (
                 <Typography variant="body2" color="text.secondary">
                   No brand data available
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Brands analyzed (includes discovered competitors) */}
+        <Grid item xs={12}>
+          <Card
+            elevation={0}
+            sx={{
+              background: 'white',
+              borderRadius: 2,
+              border: '1px solid #e5e7eb',
+            }}
+          >
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <PsychologyIcon color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Brands Analyzed
+                </Typography>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              {brandNames.length > 0 ? (
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {brandNames.map((name, idx) => (
+                    <Chip
+                      key={`${name}-${idx}`}
+                      label={name}
+                      size="small"
+                      sx={{
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        color: 'white',
+                        fontWeight: 600,
+                      }}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No brands available yet.
                 </Typography>
               )}
             </CardContent>

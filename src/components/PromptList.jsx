@@ -38,7 +38,7 @@ function PromptList({ prompts }) {
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>
           Prompts Tracked
         </Typography>
-        <Box display="flex" gap={1}>
+        <Box display="flex" gap={1} flexWrap="wrap">
           <TextField
             size="small"
             placeholder="Search prompts..."
@@ -54,11 +54,23 @@ function PromptList({ prompts }) {
             sx={{ width: 200 }}
           />
           <Chip
-            label={filterModel === 'all' ? 'All Models' : filterModel}
+            label="All Models"
             onClick={() => setFilterModel('all')}
             variant={filterModel === 'all' ? 'filled' : 'outlined'}
             size="small"
+            sx={{ fontWeight: 600 }}
           />
+          {models.map((model) => (
+            <Chip
+              key={model}
+              label={model}
+              onClick={() => setFilterModel(model)}
+              variant={filterModel === model ? 'filled' : 'outlined'}
+              size="small"
+              color={filterModel === model ? 'primary' : 'default'}
+              sx={{ fontWeight: 600 }}
+            />
+          ))}
         </Box>
       </Box>
 

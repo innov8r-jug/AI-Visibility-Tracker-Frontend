@@ -44,10 +44,7 @@ function Results() {
         if (!dashboardData) {
           setLoading(true)
         }
-        console.log('Fetching dashboard data for category:', category)
-        // Send category to API (backend handles both display name and camelCase)
         const data = await getDashboardData(category)
-        console.log('Dashboard data received:', data)
         if (isMounted) {
           setDashboardData(data)
           setLoading(false)

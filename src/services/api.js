@@ -31,8 +31,6 @@ export const analyzeVisibility = async (category, brands, aiModels = null) => {
     aiModels: validModels || aiModels,
   }
 
-  console.log('API Request:', requestBody)
-
   const response = await api.post('/visibility/analyze', requestBody)
   return response.data
 }
