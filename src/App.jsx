@@ -6,17 +6,17 @@ import { VisibilityProvider } from './context/VisibilityContext'
 import './App.css'
 
 function App() {
-  return (
-    <VisibilityProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/results/:category" element={<Results />} />
-        </Routes>
-      </Router>
-    </VisibilityProvider>
-  )
+    return (
+        <VisibilityProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    {/* Removed the /:category URL parameter! */}
+                    <Route path="/results" element={<Results />} />
+                </Routes>
+            </Router>
+        </VisibilityProvider>
+    )
 }
 
 export default App
-

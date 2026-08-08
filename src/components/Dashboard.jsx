@@ -1,81 +1,49 @@
 import React from 'react'
-import { Grid, Box, Fade } from '@mui/material'
+import { Grid, Box, Fade, Typography, Paper } from '@mui/material'
 import MetricsCard from './MetricsCard'
 import Leaderboard from './Leaderboard'
-import PromptList from './PromptList'
-import TopCitedPages from './TopCitedPages'
-import ModelInsights from './ModelInsights'
+import WritesonicLogo from './WritesonicLogo'
 
-function Dashboard({ data, tabValue }) {
-  return (
-    <Fade in={true} timeout={300}>
-      <Box>
-        <Grid container spacing={3}>
-          {/* Metrics Cards - Always visible */}
-          <Grid item xs={12}>
-            <MetricsCard metrics={data.metrics} brandMetrics={data.brandMetrics} />
-          </Grid>
+function Dashboard({ data }) {
+    // If no data has been fetched yet, show empty state
+    if (!data) {
+        return (
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh">
+                <WritesonicLogo size={60} showText={true} />
+                <Typography variant="h6" color="text.secondary" sx={{ mt: 3 }}>
+                    Enter a prompt above to run real-time GEO analysis.
+                </Typography>
+            </Box>
+        )
+    }
 
-          {/* General Tab: Show Model Insights only */}
-          {tabValue === 0 && (
-            <Grid item xs={12}>
-              <ModelInsights data={data} tabValue={tabValue} />
-            </Grid>
-          )}
+    return (
+        <Fade in={true} timeout={300}>
+            <Box>
+                <Grid container spacing={3}>
+                    {/* Real-time Query Info */}
+                    <Grid item xs={12}>
+                        <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid #e0e7ff', background: '#f8fafc' }}>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>Analyzed Prompt</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 600, fontStyle: 'italic', color: '#1F2937' }}>
+                                "{data.prompt}"
+                            </Typography>
+                        </Paper>
+                    </Grid>
 
-          {/* Platforms Tab: Show Leaderboard and Top Cited Pages with model filtering */}
-          {tabValue === 1 && (
-            <>
-              <Grid item xs={12}>
-                <ModelInsights data={data} tabValue={tabValue} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Leaderboard
-                  leaderboard={data.leaderboard}
-                  leaderboardByModel={data.leaderboardByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TopCitedPages
-                  topCitedPages={data.topCitedPages}
-                  topCitedPagesByModel={data.topCitedPagesByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-            </>
-          )}
+                    {/* Execution Metrics */}
+                    <Grid item xs={12}>
+                        <MetricsCard data={data} />
+                    </Grid>
 
-          {/* Competitors Tab: Show all competitor-focused components */}
-          {tabValue === 2 && (
-            <>
-              <Grid item xs={12}>
-                <ModelInsights data={data} tabValue={tabValue} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Leaderboard
-                  leaderboard={data.leaderboard}
-                  leaderboardByModel={data.leaderboardByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TopCitedPages
-                  topCitedPages={data.topCitedPages}
-                  topCitedPagesByModel={data.topCitedPagesByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <PromptList prompts={data.prompts} />
-              </Grid>
-            </>
-          )}
-        </Grid>
-      </Box>
-    </Fade>
-  )
+                    {/* Share of Model Leaderboard */}
+                    <Grid item xs={12}>
+                        <Leaderboard analysisData={data.analysisData} />
+                    </Grid>
+                </Grid>
+            </Box>
+        </Fade>
+    )
 }
 
 export default Dashboard
-
