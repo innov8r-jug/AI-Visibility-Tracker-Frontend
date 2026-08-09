@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Paper,
   Typography,
@@ -8,13 +8,26 @@ import {
   Chip,
   Box,
   Link,
+  Button,
 } from '@mui/material'
-import { Link as LinkIcon, OpenInNew as OpenInNewIcon } from '@mui/icons-material'
+import {
+  Link as LinkIcon,
+  OpenInNew as OpenInNewIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+} from '@mui/icons-material'
+
+const DEFAULT_VISIBLE_COUNT = 5
 
 function TopCitedPages({ topCitedPages = [] }) {
-  const sortedPages = [...topCitedPages]
-    .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
-    .slice(0, 10)
+  const [expanded, setExpanded] = useState(false)
+
+  // Sorted (not truncated) - every citation is shown, never silently hidden. Only the
+  // "top" ranking comes from sort order; a collapse/expand toggle keeps the default view
+  // compact without dropping any real data the way a hard slice cap used to.
+  const sortedPages = [...topCitedPages].sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
+  const hiddenCount = sortedPages.length - DEFAULT_VISIBLE_COUNT
+  const visiblePages = expanded ? sortedPages : sortedPages.slice(0, DEFAULT_VISIBLE_COUNT)
 
   return (
     <Paper
@@ -31,17 +44,20 @@ function TopCitedPages({ topCitedPages = [] }) {
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>
           Top Cited Pages
         </Typography>
+        {sortedPages.length > 0 && (
+          <Chip label={sortedPages.length} size="small" sx={{ fontWeight: 600 }} />
+        )}
       </Box>
 
       <List>
-        {sortedPages.length === 0 ? (
+        {visiblePages.length === 0 ? (
           <ListItem>
             <ListItemText
               primary={<Typography color="text.secondary">No citations available</Typography>}
             />
           </ListItem>
         ) : (
-          sortedPages.map((page, index) => (
+          visiblePages.map((page, index) => (
             <ListItem
               key={index}
               sx={{
@@ -61,6 +77,9 @@ function TopCitedPages({ topCitedPages = [] }) {
                 sx={{ minWidth: 0 }}
                 primary={
                   <Box display="flex" alignItems="center" gap={1} mb={0.5} sx={{ minWidth: 0 }}>
+                    {index === 0 && (
+                      <Chip label="Top" size="small" color="secondary" sx={{ fontWeight: 700, flexShrink: 0 }} />
+                    )}
                     <Link
                       href={page.url}
                       target="_blank"
@@ -81,12 +100,17 @@ function TopCitedPages({ topCitedPages = [] }) {
                 }
                 secondary={
                   <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
-                    <Chip
-                      label={`${page.citationCount || 0} citations`}
-                      size="small"
-                      color="primary"
-                      sx={{ flexShrink: 0 }}
-                    />
+                    {/* Most URLs are only ever cited once across models - a "1 citations"
+                        badge on nearly every row is just noise. Only show it when it's
+                        actually a signal: the same source referenced multiple times. */}
+                    {page.citationCount > 1 && (
+                      <Chip
+                        label={`${page.citationCount} citations`}
+                        size="small"
+                        color="primary"
+                        sx={{ flexShrink: 0 }}
+                      />
+                    )}
                     <Typography
                       variant="caption"
                       color="text.secondary"
@@ -103,6 +127,17 @@ function TopCitedPages({ topCitedPages = [] }) {
           ))
         )}
       </List>
+
+      {hiddenCount > 0 && (
+        <Button
+          fullWidth
+          onClick={() => setExpanded((prev) => !prev)}
+          endIcon={expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          sx={{ mt: 1, textTransform: 'none', fontWeight: 600 }}
+        >
+          {expanded ? 'Show less' : `Show all ${sortedPages.length} citations`}
+        </Button>
+      )}
     </Paper>
   )
 }
