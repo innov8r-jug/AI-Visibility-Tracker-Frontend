@@ -16,68 +16,43 @@ import {
   BarChart as BarChartIcon,
 } from '@mui/icons-material'
 
-function ModelInsights({ data, tabValue = 0 }) {
-  const { brandMetrics = [], modelComparison = {}, metrics = {} } = data || {}
-  const brandNames = brandMetrics?.map((b) => b.brandName) || []
-  
-  // Adjust title based on tab
-  const getTitle = () => {
-    if (tabValue === 0) return 'AI Model Insights'
-    if (tabValue === 1) return 'Platform Performance Analysis'
-    if (tabValue === 2) return 'Competitor Model Performance'
-    return 'AI Model Insights'
-  }
-  
-  // Calculate insights
-  const getTopBrandsByModel = () => {
-    if (!brandMetrics || !modelComparison || Object.keys(modelComparison).length === 0) {
-      return {}
-    }
-    
-    const result = {}
-    const models = Object.keys(modelComparison)
-    
-    models.forEach(model => {
-      const brandScores = modelComparison[model] || {}
-      const sortedBrands = Object.entries(brandScores)
-        .sort(([, a], [, b]) => (b || 0) - (a || 0))
-        .slice(0, 3)
-        .map(([brand]) => brand)
-      result[model] = sortedBrands
-    })
-    
-    return result
-  }
+function ModelInsights({ data }) {
+  const { brands = [], modelComparison = {}, topCitedPages = [] } = data || {}
+  const brandNames = brands.map((b) => b.name)
+  const modelNames = Object.keys(modelComparison)
 
-  const getModelStats = () => {
-    if (!brandMetrics || !modelComparison || Object.keys(modelComparison).length === 0) {
-      return []
-    }
-    
-    const models = Object.keys(modelComparison)
-    return models.map(model => {
-      const brandScores = modelComparison[model] || {}
-      const totalMentions = Object.values(brandScores).reduce((sum, score) => sum + (score || 0), 0)
-      const brandCount = Object.keys(brandScores).length
-      
+  // modelComparison maps model -> list of brand names that model mentioned
+  const topBrandsByModel = {}
+  modelNames.forEach((model) => {
+    topBrandsByModel[model] = (modelComparison[model] || []).slice(0, 3)
+  })
+
+  const modelStats = modelNames
+    .map((model) => {
+      const mentionedBrands = modelComparison[model] || []
+      const brandCount = new Set(mentionedBrands).size
       return {
         model,
-        totalMentions: Math.round(totalMentions),
+        totalMentions: mentionedBrands.length,
         brandCount,
-        avgMentions: brandCount > 0 ? (totalMentions / brandCount).toFixed(1) : '0'
       }
-    }).sort((a, b) => b.totalMentions - a.totalMentions) // Sort by total mentions descending
-  }
+    })
+    .sort((a, b) => b.totalMentions - a.totalMentions)
 
-  const topBrandsByModel = getTopBrandsByModel()
-  const modelStats = getModelStats()
-  const totalBrands = brandMetrics?.length || 0
+  const totalBrands = brands.length
+  const totalMentions = brands.reduce((sum, b) => sum + (b.mentionCount || 0), 0)
+  // Deliberately NOT summed from brands[].citationCount: a citation isn't reliably
+  // attributable to one specific brand (the LLM doesn't link them), so per-brand
+  // citationCount is only an even split approximation. The true total is the actual
+  // distinct citations extracted, which is what's listed in Top Cited Pages below -
+  // this keeps the headline number consistent with what's visibly shown.
+  const totalCitations = topCitedPages.reduce((sum, p) => sum + (p.citationCount || 0), 0)
 
   return (
-    <Paper 
+    <Paper
       elevation={0}
-      sx={{ 
-        p: 4, 
+      sx={{
+        p: 4,
         borderRadius: 3,
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         border: '1px solid #e0e7ff',
@@ -96,13 +71,10 @@ function ModelInsights({ data, tabValue = 0 }) {
         </Box>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#1F2937' }}>
-            {getTitle()}
+            AI Model Insights
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {tabValue === 2 
-              ? 'Competitor visibility across AI platforms'
-              : `Analysis across ${metrics?.modelsUsed?.length || 0} AI models`
-            }
+            Analysis across {modelNames.length} AI model{modelNames.length === 1 ? '' : 's'}
           </Typography>
         </Box>
       </Box>
@@ -110,9 +82,9 @@ function ModelInsights({ data, tabValue = 0 }) {
       <Grid container spacing={3}>
         {/* Model Performance Summary */}
         <Grid item xs={12} md={6}>
-          <Card 
+          <Card
             elevation={0}
-            sx={{ 
+            sx={{
               height: '100%',
               background: 'white',
               borderRadius: 2,
@@ -130,9 +102,9 @@ function ModelInsights({ data, tabValue = 0 }) {
               {modelStats.length > 0 ? (
                 <Box>
                   {modelStats.map((stat, index) => (
-                    <Box 
+                    <Box
                       key={stat.model}
-                      sx={{ 
+                      sx={{
                         mb: index < modelStats.length - 1 ? 2 : 0,
                         p: 2,
                         borderRadius: 1,
@@ -144,7 +116,7 @@ function ModelInsights({ data, tabValue = 0 }) {
                         <Typography variant="body1" sx={{ fontWeight: 600 }}>
                           {stat.model}
                         </Typography>
-                        <Chip 
+                        <Chip
                           label={`${stat.totalMentions} mentions`}
                           size="small"
                           color="primary"
@@ -152,7 +124,7 @@ function ModelInsights({ data, tabValue = 0 }) {
                         />
                       </Box>
                       <Typography variant="body2" color="text.secondary">
-                        {stat.brandCount} brands • Avg {stat.avgMentions} mentions/brand
+                        {stat.brandCount} brand{stat.brandCount === 1 ? '' : 's'} mentioned
                       </Typography>
                     </Box>
                   ))}
@@ -168,9 +140,9 @@ function ModelInsights({ data, tabValue = 0 }) {
 
         {/* Top Brands by Model */}
         <Grid item xs={12} md={6}>
-          <Card 
+          <Card
             elevation={0}
-            sx={{ 
+            sx={{
               height: '100%',
               background: 'white',
               borderRadius: 2,
@@ -187,17 +159,17 @@ function ModelInsights({ data, tabValue = 0 }) {
               <Divider sx={{ mb: 2 }} />
               {Object.keys(topBrandsByModel).length > 0 ? (
                 <Box>
-                  {Object.entries(topBrandsByModel).map(([model, brands], index) => (
-                    <Box 
+                  {Object.entries(topBrandsByModel).map(([model, modelBrands], index) => (
+                    <Box
                       key={model}
-                      sx={{ 
+                      sx={{
                         mb: index < Object.keys(topBrandsByModel).length - 1 ? 2.5 : 0,
                       }}
                     >
-                      <Typography 
-                        variant="subtitle2" 
-                        sx={{ 
-                          fontWeight: 600, 
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 600,
                           color: '#6B7280',
                           mb: 1,
                           textTransform: 'uppercase',
@@ -207,13 +179,13 @@ function ModelInsights({ data, tabValue = 0 }) {
                         {model}
                       </Typography>
                       <Box display="flex" flexWrap="wrap" gap={1}>
-                        {brands.map((brand, brandIndex) => (
+                        {modelBrands.length > 0 ? modelBrands.map((brand, brandIndex) => (
                           <Chip
                             key={brandIndex}
                             label={brand}
                             size="small"
                             sx={{
-                              background: brandIndex === 0 
+                              background: brandIndex === 0
                                 ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                                 : brandIndex === 1
                                 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
@@ -226,7 +198,9 @@ function ModelInsights({ data, tabValue = 0 }) {
                               },
                             }}
                           />
-                        ))}
+                        )) : (
+                          <Typography variant="caption" color="text.secondary">No brands mentioned</Typography>
+                        )}
                       </Box>
                     </Box>
                   ))}
@@ -284,9 +258,9 @@ function ModelInsights({ data, tabValue = 0 }) {
 
         {/* Key Insights */}
         <Grid item xs={12}>
-          <Card 
+          <Card
             elevation={0}
-            sx={{ 
+            sx={{
               background: 'linear-gradient(135deg, #667eea15 0%, #764ba215 100%)',
               borderRadius: 2,
               border: '1px solid #e0e7ff',
@@ -301,7 +275,7 @@ function ModelInsights({ data, tabValue = 0 }) {
               </Box>
               <Divider sx={{ mb: 2 }} />
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Box textAlign="center">
                     <Typography variant="h4" sx={{ fontWeight: 700, color: '#667eea', mb: 0.5 }}>
                       {totalBrands}
@@ -311,33 +285,23 @@ function ModelInsights({ data, tabValue = 0 }) {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Box textAlign="center">
                     <Typography variant="h4" sx={{ fontWeight: 700, color: '#764ba2', mb: 0.5 }}>
-                      {metrics?.totalMentions || 0}
+                      {totalMentions}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Total Mentions
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <Box textAlign="center">
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#f093fb', mb: 0.5 }}>
-                      {metrics?.totalCitations || 0}
+                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#be185d', mb: 0.5 }}>
+                      {totalCitations}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Citations Found
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Box textAlign="center">
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: '#4facfe', mb: 0.5 }}>
-                      {metrics?.totalPrompts || 0}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Prompts Processed
                     </Typography>
                   </Box>
                 </Grid>
@@ -351,4 +315,3 @@ function ModelInsights({ data, tabValue = 0 }) {
 }
 
 export default ModelInsights
-

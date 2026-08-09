@@ -11,38 +11,16 @@ import {
 } from '@mui/material'
 import { Link as LinkIcon, OpenInNew as OpenInNewIcon } from '@mui/icons-material'
 
-function TopCitedPages({ topCitedPages, topCitedPagesByModel, tabValue }) {
-  // Determine which pages to display based on tab
-  let displayPages = []
-  let title = 'Top Cited Pages'
-  
-  if (tabValue === 0) {
-    // General: Show aggregated top cited pages
-    displayPages = topCitedPages || []
-    title = 'Top Cited Pages (All Platforms)'
-  } else if (tabValue === 1) {
-    // Platforms: Show pages from all models combined
-    displayPages = topCitedPagesByModel
-      ? Object.values(topCitedPagesByModel).flat()
-      : []
-    title = 'Top Cited Pages (By Platform)'
-  } else if (tabValue === 2) {
-    // Competitors: Show competitor pages (same as general but with different context)
-    displayPages = topCitedPages || []
-    title = 'Competitor Citation Sources'
-  } else {
-    displayPages = topCitedPages || []
-  }
-
-  const sortedPages = [...displayPages]
+function TopCitedPages({ topCitedPages = [] }) {
+  const sortedPages = [...topCitedPages]
     .sort((a, b) => (b.citationCount || 0) - (a.citationCount || 0))
     .slice(0, 10)
 
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        p: 3, 
+    <Paper
+      elevation={0}
+      sx={{
+        p: 3,
         borderRadius: 3,
         border: '1px solid #e5e7eb',
         background: 'white',
@@ -51,7 +29,7 @@ function TopCitedPages({ topCitedPages, topCitedPagesByModel, tabValue }) {
       <Box display="flex" alignItems="center" gap={1} mb={2}>
         <LinkIcon color="primary" sx={{ fontSize: 28 }} />
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#1F2937' }}>
-          {title}
+          Top Cited Pages
         </Typography>
       </Box>
 
@@ -80,29 +58,42 @@ function TopCitedPages({ topCitedPages, topCitedPagesByModel, tabValue }) {
               }}
             >
               <ListItemText
+                sx={{ minWidth: 0 }}
                 primary={
-                  <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                  <Box display="flex" alignItems="center" gap={1} mb={0.5} sx={{ minWidth: 0 }}>
                     <Link
                       href={page.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      sx={{ textDecoration: 'none', color: 'primary.main' }}
+                      title={page.url}
+                      sx={{ textDecoration: 'none', color: 'primary.main', minWidth: 0, overflow: 'hidden' }}
                     >
-                      <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                      <Typography
+                        variant="body1"
+                        noWrap
+                        sx={{ fontWeight: 'medium', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
                         {page.title || page.url}
                       </Typography>
                     </Link>
-                    <OpenInNewIcon fontSize="small" color="action" />
+                    <OpenInNewIcon fontSize="small" color="action" sx={{ flexShrink: 0 }} />
                   </Box>
                 }
                 secondary={
-                  <Box display="flex" alignItems="center" gap={1}>
+                  <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
                     <Chip
                       label={`${page.citationCount || 0} citations`}
                       size="small"
                       color="primary"
+                      sx={{ flexShrink: 0 }}
                     />
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      noWrap
+                      title={page.url}
+                      sx={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    >
                       {page.url}
                     </Typography>
                   </Box>
@@ -117,4 +108,3 @@ function TopCitedPages({ topCitedPages, topCitedPagesByModel, tabValue }) {
 }
 
 export default TopCitedPages
-

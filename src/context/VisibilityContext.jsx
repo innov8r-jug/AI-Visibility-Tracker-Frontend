@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
 
 const VisibilityContext = createContext()
 
@@ -11,12 +11,35 @@ export const useVisibility = () => {
 }
 
 export const VisibilityProvider = ({ children }) => {
-    const [dashboardData, setDashboardData] = useState(null)
+    // Initialize state from localStorage if available
+    const [dashboardData, setDashboardData] = useState(() => {
+        const saved = localStorage.getItem('ai_visibility_dashboard')
+        return saved ? JSON.parse(saved) : null
+    })
+
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    // Replaced 'currentCategory' with 'currentPrompt' to match the new architecture
-    const [currentPrompt, setCurrentPrompt] = useState(null)
+    const [currentPrompt, setCurrentPrompt] = useState(() => {
+        return localStorage.getItem('ai_visibility_prompt') || null
+    })
+
+    // Save to localStorage whenever data changes
+    useEffect(() => {
+        if (dashboardData) {
+            localStorage.setItem('ai_visibility_dashboard', JSON.stringify(dashboardData))
+        } else {
+            localStorage.removeItem('ai_visibility_dashboard')
+        }
+    }, [dashboardData])
+
+    useEffect(() => {
+        if (currentPrompt) {
+            localStorage.setItem('ai_visibility_prompt', currentPrompt)
+        } else {
+            localStorage.removeItem('ai_visibility_prompt')
+        }
+    }, [currentPrompt])
 
     return (
         <VisibilityContext.Provider

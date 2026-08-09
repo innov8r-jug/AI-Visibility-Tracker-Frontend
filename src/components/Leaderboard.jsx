@@ -2,15 +2,10 @@ import React from 'react'
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip } from '@mui/material'
 import { EmojiEvents as TrophyIcon } from '@mui/icons-material'
 
-function Leaderboard({ analysisData }) {
-  // Convert backend Maps to a sorted array
-  const brands = analysisData?.shareOfModel ? Object.keys(analysisData.shareOfModel) : [];
-
-  const leaderboardData = brands.map(brand => ({
-    name: brand,
-    som: analysisData.shareOfModel[brand] || 0,
-    mentions: analysisData.brandMentions[brand] || 0
-  })).sort((a, b) => b.som - a.som);
+function Leaderboard({ brands = [] }) {
+  const leaderboardData = [...brands]
+    .map((b) => ({ name: b.name, som: b.sharePercent ?? 0, mentions: b.mentionCount ?? 0 }))
+    .sort((a, b) => b.som - a.som)
 
   return (
       <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e5e7eb', background: 'white', height: '100%' }}>

@@ -10,8 +10,8 @@ import {
 function MetricsCard({ data }) {
     if (!data) return null;
 
-    const { totalModelsQueried, successfulResponses, executionTimeMs, analysisData } = data;
-    const brandsFound = analysisData?.brandMentions ? Object.keys(analysisData.brandMentions).length : 0;
+    const { totalModelsQueried = 0, successfulResponses = 0, executionTimeMs = 0, brands = [] } = data;
+    const brandsFound = brands.length;
     const successRate = totalModelsQueried > 0 ? (successfulResponses / totalModelsQueried) * 100 : 0;
 
     return (

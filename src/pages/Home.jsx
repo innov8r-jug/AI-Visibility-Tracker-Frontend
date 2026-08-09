@@ -6,99 +6,131 @@ import {
     Typography,
     TextField,
     Button,
-    Paper,
     Checkbox,
     Grid,
     Card,
     CardContent,
     Fade,
+    CircularProgress,
+    Backdrop,
+    Paper,
+    Alert,
 } from '@mui/material'
 import {
     Send as SendIcon,
     AutoAwesome as AutoAwesomeIcon,
     Business as BusinessIcon,
     Psychology as ModelIcon,
+    CheckCircleRounded as CheckIcon,
+    HourglassEmpty as PendingIcon,
 } from '@mui/icons-material'
 import { analyzeVisibility } from '../services/api'
 import WritesonicLogo from '../components/WritesonicLogo'
 import { useVisibility } from '../context/VisibilityContext'
-import './Home.css'
 
 const AIMODELS = [
-    {
-        code: 'Gemini',
-        label: 'Google Gemini',
-        icon: '🤖',
-        color: '#4285F4',
-        description: 'Google\'s advanced AI model'
-    },
-    {
-        code: 'Groq',
-        label: 'Groq AI',
-        icon: '⚡',
-        color: '#00A86B',
-        description: 'Ultra-fast AI inference'
-    },
+    { code: 'Gemini', label: 'Google Gemini', icon: '🤖', description: 'Google\'s advanced AI model' },
+    { code: 'Groq', label: 'Groq AI', icon: '⚡', description: 'Ultra-fast AI inference' },
+    { code: 'Cerebras', label: 'Cerebras AI', icon: '🧠', description: 'Ultra-fast wafer-scale inference' },
+    { code: 'Cohere', label: 'Cohere AI', icon: '🔮', description: 'Enterprise-grade language model' },
 ]
 
 function Home() {
     const navigate = useNavigate()
-    const { setDashboardData, setLoading, setCurrentPrompt } = useVisibility()
+    const { setDashboardData, setLoading: setGlobalLoading, setCurrentPrompt, error, setError } = useVisibility()
 
     const [prompt, setPrompt] = useState('')
     const [brands, setBrands] = useState('')
-    const [selectedModels, setSelectedModels] = useState(['Gemini', 'Groq'])
+    const [selectedModels, setSelectedModels] = useState(['Gemini', 'Groq', 'Cerebras', 'Cohere'])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [activeStep, setActiveStep] = useState(0)
+
+    const steps = [
+        'Dispatching parallel scatter-gather requests to LLM APIs...',
+        'Parsing structured responses & extracting entities...',
+        'Persisting telemetry & calculating Share of Model (SoM)...',
+        'Rendering enterprise analytics dashboard...'
+    ]
 
     const handleModelToggle = (modelCode) => {
         setSelectedModels((prev) =>
-            prev.includes(modelCode)
-                ? prev.filter((m) => m !== modelCode)
-                : [...prev, modelCode]
+            prev.includes(modelCode) ? prev.filter((m) => m !== modelCode) : [...prev, modelCode]
         )
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setError(null)
+
         if (!prompt.trim()) {
-            alert('Please enter a prompt to analyze.')
+            setError('Please enter a prompt to analyze.')
             return
         }
-
-        if (!selectedModels || selectedModels.length === 0) {
-            alert('Please select at least one AI model.')
+        if (selectedModels.length === 0) {
+            setError('Please select at least one AI model.')
             return
         }
 
         setIsSubmitting(true)
-        setLoading(true)
+        setGlobalLoading(true)
         setCurrentPrompt(prompt)
+
+        // Simulate smooth professional progress steps for the overlay modal
+        const stepInterval = setInterval(() => {
+            setActiveStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev))
+        }, 1200)
 
         try {
             const brandList = brands.split(',').map((b) => b.trim()).filter((b) => b)
+            const result = await analyzeVisibility(prompt, brandList, selectedModels)
 
-            const validModels = selectedModels.filter(model =>
-                model === 'Gemini' || model === 'Groq'
-            )
+            clearInterval(stepInterval)
+            setActiveStep(steps.length - 1)
 
-            // Assuming your api.js is updated to hit the new POST /api/visibility/analyze endpoint
-            const result = await analyzeVisibility(prompt, brandList, validModels)
+            // Brief pause on final step before redirecting smoothly
+            setTimeout(() => {
+                setDashboardData(result)
+                setGlobalLoading(false)
+                navigate('/results')
+            }, 600)
 
-            setDashboardData(result)
-            navigate('/results')
-
-        } catch (error) {
-            console.error('Error starting analysis:', error)
-            alert('Error connecting to the AI models. Please try again.')
-        } finally {
+        } catch (err) {
+            clearInterval(stepInterval)
+            console.error('Error starting analysis:', err)
+            setError('Error connecting to AI engines. Ensure the backend is running and reachable.')
             setIsSubmitting(false)
-            setLoading(false)
+            setGlobalLoading(false)
+            setActiveStep(0)
         }
     }
 
     return (
-        <Box className="home-container" sx={{ background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)' }}>
-            <Container maxWidth="md" sx={{ py: { xs: 4, md: 8 } }}>
+        <Box className="home-container" sx={{ background: 'linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%)', minHeight: '100vh', py: 6 }}>
+            {/* Professional Full-Screen Loading Backdrop Modal */}
+            <Backdrop
+                sx={{
+                    color: '#fff',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                    background: 'rgba(15, 23, 42, 0.85)',
+                    backdropFilter: 'blur(8px)',
+                    flexDirection: 'column',
+                    gap: 3,
+                }}
+                open={isSubmitting}
+            >
+                <WritesonicLogo size={64} showText={false} />
+                <CircularProgress size={56} sx={{ color: '#00d2ff' }} />
+                <Box sx={{ textAlign: 'center', maxWidth: 450, px: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#f8fafc' }}>
+                        Executing Generative Engine Optimization
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#94a3b8', minHeight: '3rem', fontWeight: 500 }}>
+                        {steps[activeStep]}
+                    </Typography>
+                </Box>
+            </Backdrop>
+
+            <Container maxWidth="md">
                 <Fade in={true} timeout={800}>
                     <Paper
                         elevation={0}
@@ -106,7 +138,7 @@ function Home() {
                             p: { xs: 4, md: 6 },
                             borderRadius: 4,
                             background: '#FFFFFF',
-                            boxShadow: '0 10px 40px -10px rgba(59,0,255,0.1)',
+                            boxShadow: '0 10px 40px -10px rgba(59,0,255,0.08)',
                             border: '1px solid #e2e8f0'
                         }}
                     >
@@ -139,9 +171,15 @@ function Home() {
                                     color: '#64748b'
                                 }}
                             >
-                                Enter a free-form query to track brand visibility across multiple LLMs in real-time.
+                                Enter a query to benchmark real-time brand visibility across concurrent LLMs.
                             </Typography>
                         </Box>
+
+                        {error && (
+                            <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 3, borderRadius: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
 
                         <form onSubmit={handleSubmit}>
                             <Grid container spacing={4}>
@@ -153,10 +191,7 @@ function Home() {
                                             border: '2px solid #e2e8f0',
                                             borderRadius: 3,
                                             transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                borderColor: '#3b00ff',
-                                                boxShadow: '0 4px 12px rgba(59, 0, 255, 0.08)'
-                                            }
+                                            '&:hover': { borderColor: '#3b00ff', boxShadow: '0 4px 12px rgba(59, 0, 255, 0.08)' }
                                         }}
                                     >
                                         <CardContent sx={{ p: 3 }}>
@@ -168,7 +203,7 @@ function Home() {
                                             </Box>
                                             <TextField
                                                 fullWidth
-                                                placeholder="e.g., What are the best CRM tools for small businesses?"
+                                                placeholder="e.g., What are the best CRM tools in the market?"
                                                 value={prompt}
                                                 onChange={(e) => setPrompt(e.target.value)}
                                                 required
@@ -184,7 +219,7 @@ function Home() {
                                     </Card>
                                 </Grid>
 
-                                {/* Brands Input (Optional) */}
+                                {/* Brands Input */}
                                 <Grid item xs={12}>
                                     <Card
                                         elevation={0}
@@ -192,10 +227,7 @@ function Home() {
                                             border: '2px solid #e2e8f0',
                                             borderRadius: 3,
                                             transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                borderColor: '#d536d6',
-                                                boxShadow: '0 4px 12px rgba(213, 54, 214, 0.08)'
-                                            }
+                                            '&:hover': { borderColor: '#d536d6', boxShadow: '0 4px 12px rgba(213, 54, 214, 0.08)' }
                                         }}
                                     >
                                         <CardContent sx={{ p: 3 }}>
@@ -238,15 +270,11 @@ function Home() {
                                                         elevation={0}
                                                         sx={{
                                                             cursor: 'pointer',
-                                                            border: isSelected ? '2px solid' : '2px solid #e2e8f0',
-                                                            borderColor: isSelected ? '#3b00ff' : '#e2e8f0',
+                                                            border: isSelected ? '2px solid #3b00ff' : '2px solid #e2e8f0',
                                                             borderRadius: 3,
                                                             transition: 'all 0.2s ease',
                                                             background: isSelected ? 'linear-gradient(135deg, rgba(59,0,255,0.05) 0%, rgba(59,0,255,0.02) 100%)' : '#ffffff',
-                                                            '&:hover': {
-                                                                borderColor: '#3b00ff',
-                                                                transform: 'translateY(-2px)'
-                                                            }
+                                                            '&:hover': { borderColor: '#3b00ff', transform: 'translateY(-2px)' }
                                                         }}
                                                     >
                                                         <CardContent sx={{ p: 2 }}>
@@ -304,7 +332,7 @@ function Home() {
                                             }
                                         }}
                                     >
-                                        {isSubmitting ? 'Running Parallel Scatter-Gather Engine...' : 'Analyze GEO Visibility'}
+                                        Analyze GEO Visibility
                                     </Button>
                                 </Grid>
                             </Grid>
