@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
+// Falls back to the local dev backend port; override via VITE_API_URL in .env (see .env.example)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,50 +11,30 @@ const api = axios.create({
 })
 
 /**
- * Send visibility analysis request to backend
- * @param {string} category - Category name (e.g., "CRM software")
- * @param {string[]} brands - Array of brand names
- * @param {string[]} aiModels - Array of AI model codes ("Gemini" or "Groq")
+ * Send real-time visibility analysis request to the scatter-gather backend
+ * @param {string} userPrompt - The free-form user query (e.g., "Best CRM tools")
+ * @param {string[]} targetBrands - Array of specific brand names to track
+ * @param {string[]} aiModels - Array of AI model codes ("Gemini", "Groq", or "Cerebras")
  */
-export const analyzeVisibility = async (category, brands, aiModels = null) => {
-  // Ensure aiModels are valid (Gemini or Groq)
-  const validModels = aiModels ? aiModels.filter(model => 
-    model === 'Gemini' || model === 'Groq'
-  ) : null
+export const analyzeVisibility = async (userPrompt, targetBrands, aiModels = null) => {
+  // Ensure aiModels are valid (must match a backend-supported AIModel code)
+  const SUPPORTED_MODELS = ['Gemini', 'Groq', 'Cerebras', 'Cohere']
+  const validModels = aiModels ? aiModels.filter(model => SUPPORTED_MODELS.includes(model)) : null
 
   if (validModels && validModels.length === 0) {
-    throw new Error('At least one valid AI model (Gemini or Groq) must be selected')
+    throw new Error(`At least one valid AI model (${SUPPORTED_MODELS.join(', ')}) must be selected`)
   }
 
+  // Matches the exact fields in CustomPromptRequest.java
   const requestBody = {
-    category,
-    brands,
+    userPrompt,
+    targetBrands,
     aiModels: validModels || aiModels,
   }
 
+  // Calls the CustomPromptController endpoint
   const response = await api.post('/visibility/analyze', requestBody)
   return response.data
 }
 
-export const getDashboardData = async (category) => {
-  const response = await api.get(`/visibility/dashboard/${encodeURIComponent(category)}`)
-  return response.data
-}
-
-export const getAllBrands = async () => {
-  const response = await api.get('/brands')
-  return response.data
-}
-
-export const getBrandsByCategory = async (categoryName) => {
-  const response = await api.get(`/brands/category/${encodeURIComponent(categoryName)}`)
-  return response.data
-}
-
-export const getAllCategories = async () => {
-  const response = await api.get('/categories')
-  return response.data
-}
-
 export default api
-

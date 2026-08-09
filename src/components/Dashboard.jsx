@@ -1,81 +1,65 @@
 import React from 'react'
-import { Grid, Box, Fade } from '@mui/material'
+import { Grid, Box, Fade, Paper, Typography } from '@mui/material'
 import MetricsCard from './MetricsCard'
 import Leaderboard from './Leaderboard'
-import PromptList from './PromptList'
 import TopCitedPages from './TopCitedPages'
 import ModelInsights from './ModelInsights'
+import WritesonicLogo from './WritesonicLogo'
+import { normalizeDashboardData } from '../utils/dashboardShape'
 
-function Dashboard({ data, tabValue }) {
-  return (
-    <Fade in={true} timeout={300}>
-      <Box>
-        <Grid container spacing={3}>
-          {/* Metrics Cards - Always visible */}
-          <Grid item xs={12}>
-            <MetricsCard metrics={data.metrics} brandMetrics={data.brandMetrics} />
-          </Grid>
+function Dashboard({ data }) {
+    if (!data) {
+        return (
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh" textAlign="center">
+                <WritesonicLogo size={64} showText={true} />
+                <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
+                    No data available. Run a new search above.
+                </Typography>
+            </Box>
+        )
+    }
 
-          {/* General Tab: Show Model Insights only */}
-          {tabValue === 0 && (
-            <Grid item xs={12}>
-              <ModelInsights data={data} tabValue={tabValue} />
-            </Grid>
-          )}
+    const normalized = normalizeDashboardData(data)
 
-          {/* Platforms Tab: Show Leaderboard and Top Cited Pages with model filtering */}
-          {tabValue === 1 && (
-            <>
-              <Grid item xs={12}>
-                <ModelInsights data={data} tabValue={tabValue} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Leaderboard
-                  leaderboard={data.leaderboard}
-                  leaderboardByModel={data.leaderboardByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TopCitedPages
-                  topCitedPages={data.topCitedPages}
-                  topCitedPagesByModel={data.topCitedPagesByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-            </>
-          )}
+    return (
+        <Fade in={true} timeout={300}>
+            <Box>
+                <Grid container spacing={3}>
+                    {/* Active Prompt Banner */}
+                    <Grid item xs={12}>
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: '1px solid #e2e8f0', background: '#ffffff' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                                Evaluated Query
+                            </Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#0f172a', fontStyle: 'italic' }}>
+                                "{normalized.prompt || 'Custom Prompt'}"
+                            </Typography>
+                        </Paper>
+                    </Grid>
 
-          {/* Competitors Tab: Show all competitor-focused components */}
-          {tabValue === 2 && (
-            <>
-              <Grid item xs={12}>
-                <ModelInsights data={data} tabValue={tabValue} />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Leaderboard
-                  leaderboard={data.leaderboard}
-                  leaderboardByModel={data.leaderboardByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TopCitedPages
-                  topCitedPages={data.topCitedPages}
-                  topCitedPagesByModel={data.topCitedPagesByModel}
-                  tabValue={tabValue}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <PromptList prompts={data.prompts} />
-              </Grid>
-            </>
-          )}
-        </Grid>
-      </Box>
-    </Fade>
-  )
+                    {/* Metrics Cards */}
+                    <Grid item xs={12}>
+                        <MetricsCard data={normalized} />
+                    </Grid>
+
+                    {/* Leaderboard */}
+                    <Grid item xs={12} md={6}>
+                        <Leaderboard brands={normalized.brands} />
+                    </Grid>
+
+                    {/* Top Cited Pages */}
+                    <Grid item xs={12} md={6}>
+                        <TopCitedPages topCitedPages={normalized.topCitedPages} />
+                    </Grid>
+
+                    {/* Model Insights */}
+                    <Grid item xs={12}>
+                        <ModelInsights data={normalized} />
+                    </Grid>
+                </Grid>
+            </Box>
+        </Fade>
+    )
 }
 
 export default Dashboard
-
